@@ -12,7 +12,7 @@
       "name": "contextual-design-to-code",
       "source": "./Plugins/contextual-design-to-code",
       "description": "Autonomous UI/UX architect — a strict 4-phase design-to-code pipeline (art direction, resource sync, code production, runtime validation) for premium React + Tailwind interfaces.",
-      "version": "0.1.0"
+      "version": "0.1.1"
     }
   ]
 }
