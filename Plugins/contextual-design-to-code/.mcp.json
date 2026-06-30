@@ -1,0 +1,30 @@
+{
+  "mcpServers": {
+    "design-inspiration": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["${DESIGN_INSPIRATION_DIST}/index.js"],
+      "env": {
+        "SERPER_API_KEY": "${SERPER_API_KEY}"
+      }
+    },
+    "iconify-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "iconify-mcp-server@latest"]
+    },
+    "pixabay-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "pixabay-mcp"],
+      "env": {
+        "PIXABAY_API_KEY": "${PIXABAY_API_KEY}"
+      }
+    },
+    "chrome-devtools": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["chrome-devtools-mcp@latest"]
+    }
+  }
+}
