@@ -37,7 +37,7 @@ The **orchestrator is a system prompt** (`context/system-prompt.md`) that is inj
 - **Hook (`SessionStart`)** — injects the orchestrator system prompt.
 - **4 skills** — one per pipeline phase.
 - **4 MCP servers** (`.mcp.json`):
-  - `design-inspiration` — SiteInspire / Godly (`browse_godly`, `browse_siteinspire`, `search_inspiration`, ...).
+  - `design-inspiration` — SiteInspire / Godly / Awwwards / Behance, etc. (`browse_godly`, `browse_siteinspire`, `search_inspiration`, ...).
   - `iconify-mcp` — the SVG icon registry.
   - `pixabay-mcp` — photos and video backgrounds.
   - `chrome-devtools` — browser control and rendering audits.
@@ -99,27 +99,28 @@ Start the process from Phase 1 as soon as the user describes the task.
 
 | Variable | Purpose | Required | Where to get it |
 | -------- | ------- | -------- | --------------- |
-| `SERPER_API_KEY` | Search inside `design-inspiration` | Yes (for search) | https://serper.dev — 2,500 free queries |
-| `DESIGN_INSPIRATION_DIST` | Path to the built `design-inspiration` server (the `dist` folder) | Yes | see the section below |
-| `PIXABAY_API_KEY` | Access to `pixabay-mcp` | Yes | https://pixabay.com/api/docs/ |
+| `DESIGN_INSPIRATION_DIR` | Path to the cloned `design-inspiration-mcp` repo (its root folder) | Yes (for `design-inspiration`) | clone from GitHub — see below |
+| `PIXABAY_API_KEY` | Access to `pixabay-mcp` | Yes (for `pixabay-mcp`) | https://pixabay.com/api/docs/ |
 
-`iconify-mcp` and `chrome-devtools` run via `npx` and **need no keys**.
+`iconify-mcp` and `chrome-devtools` run via `npx` and **need no keys**. `design-inspiration` also needs **no API key** — just a local clone (see below).
 
 ### Note on `design-inspiration`
 
-The `design-inspiration` server (with the `browse_godly` / `browse_siteinspire` tools) is **not published to npm**, so it can't be launched with a single `npx` command. Options:
+The `design-inspiration` server is [`notsointresting/design-inspiration-mcp`](https://github.com/notsointresting/design-inspiration-mcp). It is **not published to npm** and runs **directly from source** (no build step), and it needs **no API key**. Set it up locally:
 
-1. **If it's already connected in your Cowork** (the `mcp__design-inspiration__*` tools are available), the plugin uses it as-is; the `.mcp.json` entry is only needed for portability.
-2. **For a fresh environment**, build the server from source and point to it:
-   ```bash
-   git clone <repo-design-inspiration-mcp>
-   cd design-inspiration-mcp && npm install && npm run build
-   # then export the path to the built dist folder:
-   export DESIGN_INSPIRATION_DIST="/absolute/path/to/design-inspiration-mcp/dist"
-   export SERPER_API_KEY="your-serper-key"
-   ```
+```bash
+git clone https://github.com/notsointresting/design-inspiration-mcp.git
+cd design-inspiration-mcp
+npm install
+```
 
-> The exact launch command and auth method for `design-inspiration` depend on the specific build of the server. The current `.mcp.json` uses the documented `node dist/index.js` + `SERPER_API_KEY` pattern. If your version differs, adjust the `design-inspiration` block in `.mcp.json`.
+Then point the `DESIGN_INSPIRATION_DIR` environment variable at the cloned repo's root folder — the `.mcp.json` runs `node ${DESIGN_INSPIRATION_DIR}/src/index.js`. On Windows (PowerShell):
+
+```powershell
+[Environment]::SetEnvironmentVariable("DESIGN_INSPIRATION_DIR", "C:\path\to\design-inspiration-mcp", "User")
+```
+
+Restart the app afterward. This server exposes the `browse_*`, `get_*`, and `generate_*` tools the skills rely on (e.g. `browse_godly`, `browse_siteinspire`, `browse_css_awards`, `browse_behance`, `search_inspiration`, `get_color_palettes`, `get_component_snippets`, `generate_design_tokens`).
 
 ---
 

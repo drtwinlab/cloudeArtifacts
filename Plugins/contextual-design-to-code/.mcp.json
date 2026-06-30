@@ -3,10 +3,7 @@
     "design-inspiration": {
       "type": "stdio",
       "command": "node",
-      "args": ["${DESIGN_INSPIRATION_DIST}/index.js"],
-      "env": {
-        "SERPER_API_KEY": "${SERPER_API_KEY}"
-      }
+      "args": ["${DESIGN_INSPIRATION_DIR}/src/index.js"]
     },
     "iconify-mcp": {
       "type": "stdio",
