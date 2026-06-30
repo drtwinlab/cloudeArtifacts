@@ -10,7 +10,7 @@ The whole point: instead of one-shot "generate me a landing page" prompts that p
 
 - **Anti-template by design.** Phase 1 hunts for real, working references through the `design-inspiration` MCP and deliberately avoids the overused AI look (identical cards, purple glows). References are pulled from a wide pool and sampled randomly, so two sessions don't converge on the same design.
 - **A single source of truth.** Everything downstream inherits from `DESIGN_SPEC.md`. No inline hardcoded colors, no `bg-red-500` that isn't in the spec — only custom Tailwind tokens defined up front.
-- **Real assets, never hallucinated.** Icons come from a single Iconify pack via `iconify-mcp` (no hand-written SVG paths); photos and looping video backgrounds come from `pixabay-mcp` as real, high-resolution URLs. No broken links or placeholder images survive into the output.
+- **Real assets, never hallucinated.** Icons come from a single Iconify pack via `iconify-mcp` (no hand-written SVG paths); photos come from the keyless `openverse` MCP as real, openly-licensed URLs (with attribution). No broken links or placeholder images survive into the output.
 - **Built-in runtime validation.** Phase 4 opens the result in a real browser through `chrome-devtools`, clears React/JS console warnings, and audits the layout at Desktop (1440px) and Mobile (375px) before handing off.
 - **Autonomous where it should be.** Only Phase 1 is interactive. Once the spec is approved, Phases 2–4 run end-to-end without pestering the user for approvals.
 - **Always-on, but scoped.** The orchestrator is injected at the start of every session, yet it only activates for web UI / site / landing / dashboard tasks and stays out of the way otherwise.
@@ -26,7 +26,7 @@ The **orchestrator is a system prompt** (`context/system-prompt.md`) that is inj
 | Phase | Skill | Mode | Output |
 | ----- | ----- | ---- | ------ |
 | 1. Art direction | `phase-1-art-direction` | Interactive | `DESIGN_SPEC.md` |
-| 2. Resource sync | `phase-2-resource-sync` | Autonomous | Icons + media |
+| 2. Resource sync | `phase-2-resource-sync` | Autonomous | Icons + photos |
 | 3. Code production | `phase-3-code-production` | Autonomous | React + Tailwind |
 | 4. Runtime validation | `phase-4-runtime-validation` | Autonomous | Clean console + layout |
 
@@ -36,10 +36,10 @@ The **orchestrator is a system prompt** (`context/system-prompt.md`) that is inj
 
 - **Hook (`SessionStart`)** — injects the orchestrator system prompt.
 - **4 skills** — one per pipeline phase.
-- **4 MCP servers** (`.mcp.json`):
+- **4 MCP servers** (`.mcp.json`), all keyless and run via `npx`:
   - `design-inspiration` — SiteInspire / Godly / Awwwards / Behance, etc. (`browse_godly`, `browse_siteinspire`, `search_inspiration`, ...).
   - `iconify-mcp` — the SVG icon registry.
-  - `pixabay-mcp` — photos and video backgrounds.
+  - `openverse` — openly-licensed stock photos (no API key).
   - `chrome-devtools` — browser control and rendering audits.
 
 ---
@@ -64,7 +64,7 @@ MCP servers strictly phase by phase.
 - `design-inspiration` — SiteInspire, Godly (browse_godly, browse_siteinspire,
   search_inspiration, get_color_palettes, get_component_snippets, generate_design_tokens).
 - `iconify-mcp` — the official SVG icon registry.
-- `pixabay-mcp` — a library of high-quality photos and video backgrounds.
+- `openverse` — openly-licensed stock photos (keyless), with attribution.
 - `chrome-devtools` — browser control, console reading, and rendering audits.
 
 ## CONTEXT-MANAGEMENT RULES (KARPATHY HACKS 2026):
@@ -89,7 +89,7 @@ Start the process from Phase 1 as soon as the user describes the task.
 ### What each step does
 
 1. **Phase 1 — Alignment & Art Direction (interactive).** Talks to the user architect-to-architect, asks 2–3 deep questions about the desired feeling, pulls real references from `design-inspiration`, and locks the direction into a concise `DESIGN_SPEC.md` (core idea, Tailwind config tokens, layout/type rules, micro-interactions).
-2. **Phase 2 — Resource Sync (autonomous).** Reads `DESIGN_SPEC.md`, picks one Iconify pack matching the style, fetches exact SVG icons, and gathers real Pixabay photos/looping videos that match the palette.
+2. **Phase 2 — Resource Sync (autonomous).** Reads `DESIGN_SPEC.md`, picks one Iconify pack matching the style, fetches exact SVG icons, and gathers real openly-licensed photos from Openverse that match the palette.
 3. **Phase 3 — Code Production (autonomous).** Generates clean, responsive React + Tailwind that strictly inherits from the spec, wires in the real icons and media, and bans any token or asset not defined in Phase 1–2.
 4. **Phase 4 — Runtime Validation (autonomous).** Opens the result via `chrome-devtools`, clears console/React warnings, screenshots Desktop 1440px and Mobile 375px, checks the layout against the spec, then delivers the final verdict.
 
@@ -97,15 +97,15 @@ Start the process from Phase 1 as soon as the user describes the task.
 
 ## Setup
 
-Three of the four MCP servers need **no configuration** — `design-inspiration`, `iconify-mcp`, and `chrome-devtools` are fetched and run automatically via `npx`. Only `pixabay-mcp` optionally takes an API key:
-
-| Variable | Purpose | Required | Where to get it |
-| -------- | ------- | -------- | --------------- |
-| `PIXABAY_API_KEY` | Access to `pixabay-mcp` (Phase 2 photos/video) | Optional | https://pixabay.com/api/docs/ |
+**No configuration, no API keys.** All four MCP servers run via `npx` and start automatically — `design-inspiration`, `iconify-mcp`, `openverse`, and `chrome-devtools` are all keyless. Just install the plugin and go (the first launch of each is a little slower while npm fetches it).
 
 ### Note on `design-inspiration`
 
 The `design-inspiration` server is [`notsointresting/design-inspiration-mcp`](https://github.com/notsointresting/design-inspiration-mcp). It is **not published to npm**, so the plugin runs it straight from GitHub via `npx` (`npx -y github:notsointresting/design-inspiration-mcp`). That means **no clone, no path, and no API key** — it self-installs on first launch (the first start can take a little longer while npm fetches it). It exposes the `browse_*`, `get_*`, and `generate_*` tools the skills rely on (e.g. `browse_godly`, `browse_siteinspire`, `browse_css_awards`, `browse_behance`, `search_inspiration`, `get_color_palettes`, `get_component_snippets`, `generate_design_tokens`).
+
+### Note on `openverse`
+
+The `openverse` server is [`mcp-openverse`](https://www.npmjs.com/package/mcp-openverse), run via `npx -y mcp-openverse`. It searches [Openverse](https://openverse.org/) for openly-licensed (Creative Commons / public-domain) photos using **anonymous access — no API key**. Images come with attribution data (creator + license); prefer `cc0` / commercial licenses and credit creators when the license requires it. Anonymous rate limits apply.
 
 ---
 
@@ -127,14 +127,14 @@ You can also trigger a single phase directly: "start phase 2", "check the render
 contextual-design-to-code/
 ├── .claude-plugin/
 │   └── plugin.json                 # Plugin manifest
-├── .mcp.json                       # 4 MCP servers
+├── .mcp.json                       # 4 MCP servers (all keyless, via npx)
 ├── hooks/
 │   └── hooks.json                  # SessionStart → injects the system prompt
 ├── context/
 │   └── system-prompt.md            # The orchestrator (step 1 → step 4)
 ├── skills/
 │   ├── phase-1-art-direction/      # Interactive — produces DESIGN_SPEC.md
-│   ├── phase-2-resource-sync/      # Autonomous — icons + media
+│   ├── phase-2-resource-sync/      # Autonomous — icons + photos
 │   ├── phase-3-code-production/    # Autonomous — React + Tailwind
 │   └── phase-4-runtime-validation/ # Autonomous — Chrome DevTools audit
 └── README.md

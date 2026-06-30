@@ -10,13 +10,10 @@
       "command": "npx",
       "args": ["-y", "iconify-mcp-server@latest"]
     },
-    "pixabay-mcp": {
+    "openverse": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "pixabay-mcp"],
-      "env": {
-        "PIXABAY_API_KEY": "${PIXABAY_API_KEY}"
-      }
+      "args": ["-y", "mcp-openverse"]
     },
     "chrome-devtools": {
       "type": "stdio",
