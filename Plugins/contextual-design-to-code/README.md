@@ -95,32 +95,17 @@ Start the process from Phase 1 as soon as the user describes the task.
 
 ---
 
-## Setup (environment variables)
+## Setup
+
+Three of the four MCP servers need **no configuration** — `design-inspiration`, `iconify-mcp`, and `chrome-devtools` are fetched and run automatically via `npx`. Only `pixabay-mcp` optionally takes an API key:
 
 | Variable | Purpose | Required | Where to get it |
 | -------- | ------- | -------- | --------------- |
-| `DESIGN_INSPIRATION_DIR` | Path to the cloned `design-inspiration-mcp` repo (its root folder) | Yes (for `design-inspiration`) | clone from GitHub — see below |
-| `PIXABAY_API_KEY` | Access to `pixabay-mcp` | Yes (for `pixabay-mcp`) | https://pixabay.com/api/docs/ |
-
-`iconify-mcp` and `chrome-devtools` run via `npx` and **need no keys**. `design-inspiration` also needs **no API key** — just a local clone (see below).
+| `PIXABAY_API_KEY` | Access to `pixabay-mcp` (Phase 2 photos/video) | Optional | https://pixabay.com/api/docs/ |
 
 ### Note on `design-inspiration`
 
-The `design-inspiration` server is [`notsointresting/design-inspiration-mcp`](https://github.com/notsointresting/design-inspiration-mcp). It is **not published to npm** and runs **directly from source** (no build step), and it needs **no API key**. Set it up locally:
-
-```bash
-git clone https://github.com/notsointresting/design-inspiration-mcp.git
-cd design-inspiration-mcp
-npm install
-```
-
-Then point the `DESIGN_INSPIRATION_DIR` environment variable at the cloned repo's root folder — the `.mcp.json` runs `node ${DESIGN_INSPIRATION_DIR}/src/index.js`. On Windows (PowerShell):
-
-```powershell
-[Environment]::SetEnvironmentVariable("DESIGN_INSPIRATION_DIR", "C:\path\to\design-inspiration-mcp", "User")
-```
-
-Restart the app afterward. This server exposes the `browse_*`, `get_*`, and `generate_*` tools the skills rely on (e.g. `browse_godly`, `browse_siteinspire`, `browse_css_awards`, `browse_behance`, `search_inspiration`, `get_color_palettes`, `get_component_snippets`, `generate_design_tokens`).
+The `design-inspiration` server is [`notsointresting/design-inspiration-mcp`](https://github.com/notsointresting/design-inspiration-mcp). It is **not published to npm**, so the plugin runs it straight from GitHub via `npx` (`npx -y github:notsointresting/design-inspiration-mcp`). That means **no clone, no path, and no API key** — it self-installs on first launch (the first start can take a little longer while npm fetches it). It exposes the `browse_*`, `get_*`, and `generate_*` tools the skills rely on (e.g. `browse_godly`, `browse_siteinspire`, `browse_css_awards`, `browse_behance`, `search_inspiration`, `get_color_palettes`, `get_component_snippets`, `generate_design_tokens`).
 
 ---
 
