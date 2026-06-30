@@ -2,7 +2,7 @@
 name: phase-3-code-production
 description: >
   PHASE 3 of the Contextual Design-to-Code Engine pipeline — production generation of
-  React + Tailwind code based on DESIGN_SPEC.md and the resources gathered in Phase 2.
+  React + Tailwind code based on DESIGN_SPEC.md and the icons gathered in Phase 2.
   Should be used after assets are gathered, to produce the actual components.
   Triggers: "generate the code", "assemble the components", "phase 3",
   "code production", "build components", "generate code".
@@ -23,6 +23,6 @@ Assemble production-ready frontend code based on the gathered artifacts.
 2. Component assembly:
    - Generate clean, responsive, modular code (React + Tailwind CSS).
    - Integrate the exact SVG strings obtained from Iconify in Phase 2.
-   - Replace all placeholders with the real image URLs obtained from Openverse in Phase 2. No broken link or placeholder image should remain in the code.
+   - For imagery, rely on icons, CSS gradients/shapes, and the design's own visual system. Do not insert external stock-photo URLs or placeholder-image services — no broken links in the output.
 3. Animation control: Implement micro-interactions (hovers, focuses, transitions) strictly with the timings and physics described in the spec.
-4. Delivery: Output the finished code. When done, write a concise: "Components assembled based on the spec and the media library. Pipeline completed successfully."
+4. Delivery: Output the finished code. When done, write a concise: "Components assembled based on the spec. Pipeline completed successfully."

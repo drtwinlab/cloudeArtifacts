@@ -1,7 +1,7 @@
 {
   "name": "contextual-design-to-code",
-  "version": "0.1.3",
-  "description": "Autonomous UI/UX architect. A strict 4-phase design-to-code pipeline (art direction -> resource sync -> code production -> runtime validation) for premium React + Tailwind interfaces, orchestrated by an always-on system prompt over the design-inspiration, iconify, openverse, and chrome-devtools MCP servers.",
+  "version": "0.2.0",
+  "description": "Autonomous UI/UX architect. A strict 4-phase design-to-code pipeline (art direction -> icon sync -> code production -> runtime validation) for premium React + Tailwind interfaces, orchestrated by an always-on system prompt. Uses web search for design references plus the iconify and chrome-devtools MCP servers.",
   "author": {
     "name": "Rostyslav"
   },
