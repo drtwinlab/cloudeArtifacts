@@ -13,6 +13,12 @@
       "source": "./Plugins/contextual-design-to-code",
       "description": "Autonomous UI/UX architect — a strict 4-phase design-to-code pipeline (art direction, icon sync, code production, runtime validation) for premium React + Tailwind interfaces.",
       "version": "0.2.0"
+    },
+    {
+      "name": "email-template-from-reference",
+      "source": "./Plugins/email-template-from-reference",
+      "description": "Generate cross-client HTML email templates from a visual reference (image or Figma) and QA them against the reference with a region-by-region parity loop until they match. Includes a builder skill and a standalone QA skill; email coding rules are built in.",
+      "version": "0.1.0"
     }
   ]
 }
