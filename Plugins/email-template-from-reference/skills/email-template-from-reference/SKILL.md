@@ -83,6 +83,8 @@ Then hand back:
 
 Present the HTML and render with `present_files`. Keep the written summary brief — the files speak for themselves.
 
+**Optional — real-client preview.** If the user wants to see how the email renders in real inboxes (Outlook, Gmail, Apple Mail, iOS, Android), offer the `email-client-screenshots` skill (Email on Acid). It is a paid, on-request step — don't run it automatically.
+
 ## Notes and gotchas
 
 - **Original reference is ground truth.** Anchor every QA pass to the same saved reference; never let the target drift to a previous render.

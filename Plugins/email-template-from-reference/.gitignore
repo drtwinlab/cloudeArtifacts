@@ -1,0 +1,8 @@
+# Local Email on Acid credentials — NEVER commit these
+**/credentials.json
+
+# Test output
+**/eoa_results/
+
+# Node
+node_modules/
