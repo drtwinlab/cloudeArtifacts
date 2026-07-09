@@ -18,7 +18,7 @@
       "name": "email-template-from-reference",
       "source": "./Plugins/email-template-from-reference",
       "description": "Generate cross-client HTML email templates from a visual reference (image or Figma), QA them against the reference with a region-by-region parity loop, and preview them in real clients via Email on Acid. Email coding rules are built in.",
-      "version": "0.2.0"
+      "version": "0.3.0"
     }
   ]
 }

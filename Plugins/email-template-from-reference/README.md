@@ -6,7 +6,7 @@ A Cowork plugin that turns a design reference into a working, cross-client HTML 
 
 - **email-template-from-reference** — the builder. Generates a table-based, Outlook-safe HTML email from a reference (uploaded image or Figma link), following built-in coding rules.
 - **email-reference-qa** — the QA parity loop. Renders a built email, decomposes the reference into regions, diffs every region against the reference across a fixed design-axis checklist, and drives targeted fixes until nothing differs. Reference-agnostic — usable on its own to QA any email against any mockup.
-- **email-client-screenshots** — real-client preview. Submits the finished HTML to the Email on Acid API and returns actual screenshots from Outlook, Gmail, Apple Mail, iOS, Android, etc. Paid API, run on request.
+- **email-client-screenshots** — real-client preview. Submits the finished HTML to the Email on Acid API and shows the actual screenshots from Outlook, Gmail, Apple Mail, iOS, Android as images. Inside Cowork it drives a connected browser to call the API (the code sandbox has no outbound internet); it asks you for your Email on Acid key/password, or reads them locally. Paid API, run on request.
 
 The builder runs the QA loop automatically before delivering; you can invoke the QA skill on its own for an email someone else built, and run the client-screenshots skill when you want a real-inbox preview.
 
@@ -32,7 +32,7 @@ Content specifics (copy, links, brand colors) are applied on top of the built-in
 
 - **html-to-screenshot skill** — renders the HTML and captures screenshots (included with Cowork's standard skills).
 - **Figma connector** — only when the reference is a Figma link (for image + design tokens). Not needed if you upload an image.
-- **Email on Acid account** — only for the `email-client-screenshots` skill. Copy `skills/email-client-screenshots/scripts/credentials.example.json` to `credentials.json` (next to it) and fill in your `api_key` / `api_password` once. That file is gitignored and never committed.
+- **Email on Acid account + a connected browser** — only for the `email-client-screenshots` skill. The skill asks for your API key/password at run time. To avoid re-entering them, save them locally: copy `skills/email-client-screenshots/scripts/credentials.example.json` to `credentials.json` (gitignored, never committed) or set env vars `EMAILONACID_API_KEY` / `EMAILONACID_API_PASSWORD`. Inside Cowork the skill reaches the API through a connected Chrome browser.
 
 ## What's inside
 

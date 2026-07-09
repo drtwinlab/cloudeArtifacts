@@ -1,45 +1,68 @@
 ---
 name: email-client-screenshots
-description: "Render an HTML email across real email clients (Outlook, Gmail, Apple Mail, iOS, Android, etc.) via the Email on Acid API and return the actual client screenshots as images. Use when the user wants to see how a finished email looks in real inboxes, asks to 'test in Outlook/Gmail', 'run it through Email on Acid', 'show client previews', 'check how it renders across clients', or wants proof-of-rendering before sending. Runs the bundled Node script, downloads each client's screenshot, and shows them as real images labeled by client. This is a PAID API that consumes test credits, so run it only when the user explicitly asks. Not for coding or QA-diffing the email — pair it with the email-template-from-reference builder."
+description: "Render an HTML email across real email clients (Outlook, Gmail, Apple Mail, iOS, Android) via the Email on Acid API and show the actual client screenshots as images. Use when the user wants to see how a finished email looks in real inboxes, asks to 'test in Outlook/Gmail', 'run it through Email on Acid', 'show client previews', 'check how it renders across clients', or wants proof-of-rendering before sending. Drives a real browser (chrome-devtools) to call the API, which is the method that works inside Cowork where the code sandbox has no outbound internet. Asks the user for their Email on Acid API key and password (or reads them locally); nothing secret is stored in the repo. PAID API that consumes test credits, so run only when the user explicitly asks. Not for coding or QA-diffing; pair it with email-template-from-reference."
 ---
 
 # Email Client Screenshots (Email on Acid)
 
-Take a finished HTML email and see how it *actually* renders in real clients — Outlook (Word engine), Gmail, Apple Mail, iOS, Android — by submitting it to Email on Acid and pulling back per-client screenshots. Show those screenshots to the user as real images, not links.
+Submit a finished HTML email to Email on Acid, wait for the real clients to render, and show the user the actual per-client screenshots **as images** (not links).
 
-This is a **paid** service that spends test credits. **Only run it when the user explicitly asks** for a client preview / real-inbox test. Don't run it automatically as part of a build.
+Two facts that shape how this works:
 
-## Prerequisites
+- **The Cowork code sandbox has no outbound internet** (npm, GitHub, Email on Acid are all blocked from `bash`/Node there). The bundled Node script `scripts/emailonacid_test.js` therefore only runs on the user's own machine/terminal.
+- **A connected browser does have internet.** So inside Cowork, drive the browser (chrome-devtools) to call the API. That is the primary method (A) below.
 
-- **Node.js** and network access to `api.emailonacid.com`. If the sandbox can't reach it, tell the user to run the script locally in their terminal.
-- **Credentials.** The script (`scripts/emailonacid_test.js`) reads them from, in order:
-  1. env vars `EMAILONACID_API_KEY` / `EMAILONACID_API_PASSWORD`, or
-  2. `scripts/credentials.json` next to the script.
+This is a **paid** service that spends test credits, so **only run it when the user explicitly asks.** Never as an automatic build step.
 
-  If neither is present, tell the user: copy `scripts/credentials.example.json` to `scripts/credentials.json` and fill in `api_key` / `api_password` (one time — `credentials.json` is gitignored and never committed). Then stop and wait; don't ask them to paste the key into chat.
+## Credentials (resolve in this order; never commit or log them)
 
-## Inputs
+1. `scripts/credentials.json` next to the bundled script — shape `{ "api_key": "...", "api_password": "..." }` — gitignored, for a user who saved theirs locally.
+2. Env vars `EMAILONACID_API_KEY` / `EMAILONACID_API_PASSWORD` (check with `printenv`).
+3. Otherwise **ask the user** to paste their Email on Acid API key and password, and use them only for this run.
 
-- The **HTML email file** to test (e.g. the `email_template_vN.html` from the builder, or any `.html` the user points at).
+Never write pasted keys into a committed file and never echo them into logs. If the user pasted their key, remind them at the end that they can rotate it.
 
-## Steps
+## Clients — use exactly these (do not invent others)
 
-1. **Locate the script** at `scripts/emailonacid_test.js` inside this skill; resolve its absolute path in the installed plugin.
-2. **Confirm credentials** exist (env or `scripts/credentials.json`). If not, guide the user through the one-time `credentials.json` setup above and stop.
-3. **Run it** on the email, with `--download` so screenshots are saved locally:
+Default set, unless the user explicitly asks for a different one:
 
-   ```
-   node <abs>/scripts/emailonacid_test.js <abs>/email_template_vN.html --download --out <abs>/eoa_results
-   ```
+```
+outlook19
+outlook2021_win11_lm_dt
+o365_w10_lm_dt
+m365_w11_lm_dt
+gmailcom-lm_chrcurrent_win10
+android14_gmailapp_pixel8_lm
+android12_outlookapp_pixel6_lm
+iphone13ol_15
+iphone15plus_17
+```
 
-   Optional flags: `--image-blocking` (see how clients that block images render it), `--clients a,b,c` (override the default client set), `--subject "…"`, `--max-wait 300`, `--interval 8`.
-4. **Parse the result.** The script prints ONE JSON line to stdout:
-   `{ testId, complete, results:[{client,status,screenshotUrl,noImagesUrl,localPath}], screenshots:[...] }`. Everything else (progress) is on stderr.
-5. **Show the screenshots as images.** For each result with a `localPath`, present the PNG with `present_files` so the user sees the actual render, labeled by `client` (and note its `status`). If a client has no `localPath` (download failed or no network to the CDN), fall back to giving its `screenshotUrl` link.
-6. **Summarize briefly**: how many clients completed, and call out any that timed out or errored. If `complete` is false, say the test timed out and offer to re-poll (screenshot URLs stay valid ~90 days, so results can be fetched again later).
+## Method A — inside Cowork: drive the browser (primary)
+
+Uses `chrome-devtools` tools (load if deferred: `list_pages`, `navigate_page`, `evaluate_script`, `take_screenshot`).
+
+1. **Check a browser is connected** (`list_pages`). If none, ask the user to connect Chrome and stop.
+2. **Get credentials** (order above). Build `const auth = 'Basic ' + btoa(key + ':' + pass)`.
+3. **Land on the API origin** to avoid CORS and the native auth popup: navigate to `https://api.emailonacid.com/docs/latest/email-testing` (a public page on the same host). Do NOT navigate straight to a `/v5/...` endpoint — that triggers the browser's Basic-auth dialog. In `fetch`, always use the ABSOLUTE `https://api.emailonacid.com/v5/...` URL — relative URLs fail to parse in the evaluate context.
+4. **Create the test.** Read the email HTML file, then `evaluate_script` a POST to `https://api.emailonacid.com/v5/email/tests` with headers `Content-Type: application/json` and `Authorization: auth`, and a JSON body: `subject`, `html` (the file's contents, JSON-encoded), `transfer_encoding: "8bit"`, `charset: "utf-8"`, `clients` (the 9 above), `image_blocking: false`. Read `id` from the `{ "id": "..." }` response.
+5. **Poll results.** Every ~10s, `evaluate_script` a GET to `https://api.emailonacid.com/v5/email/tests/<id>/results` with the `Authorization` header. For each client key read `status` and `screenshots.default`. Stop when every client is `Complete` (case-insensitive) or after a ~5 min timeout (return partial).
+6. **Show screenshots as images.** Navigate to `about:blank` (the docs page is a SPA and wipes injected DOM; about:blank does not). `evaluate_script` to set `document.body.innerHTML` to one labeled `<img src="<screenshots.default>">` per client and `await` every image's `onload`. Then `take_screenshot({ fullPage: true, filePath: "<uploads-folder>/eoa_clients.png" })` — the browser tool cannot write to the outputs/deliverables root, so save into the uploads folder, then `cp` it to the outputs folder via a shell command. `present_files` the copied PNG.
+7. **Summarize.** How many clients Complete, and any that timed out or errored. Screenshot URLs stay valid ~90 days, so results can be re-fetched later.
+
+## Method B — local terminal (alternative; has its own internet)
+
+If the user would rather run it on their machine, use the bundled script:
+
+```
+node scripts/emailonacid_test.js <email.html> --download
+```
+
+It reads creds from `credentials.json`/env, submits the test, polls, and saves screenshots to `./eoa_results/`. Same default client set.
 
 ## Notes
 
-- **Paid / credits.** Every run consumes Email on Acid test credits — that's why this is on-request only.
-- **Images, not links.** The goal is to hand the user real screenshots; always prefer downloaded `localPath` images over URLs.
-- **This skill does not code or fix the email.** It only previews it in real clients. For building and for pixel-parity QA against a reference, use the `email-template-from-reference` and `email-reference-qa` skills.
+- **Paid / credits** — on-request only.
+- **Images, not links** — always show the rendered screenshots; fall back to URLs only if capture fails.
+- **Rotate pasted keys** — if the user pasted a key into chat, remind them to rotate it afterward.
+- **Not a coder/QA** — this only previews. Build with `email-template-from-reference`; pixel-diff against a reference with `email-reference-qa`.
